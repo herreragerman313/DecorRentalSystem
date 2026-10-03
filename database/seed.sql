@@ -30,7 +30,7 @@ INSERT INTO items (id, category_id, name, description, color_name, color_hex, pr
 (12, 5, 'Welcome sign easel',       'Wooden easel with a blank acrylic sign. Add your own lettering.',                   'Natural wood', '#B38B5D', 12.00, 6),
 (13, 5, 'Gold cake stand',          '12 in round metal stand.',                                                           'Gold', '#BF9B30', 8.00, 8),
 (14, 6, 'Round balloon arch frame', '7 ft round metal hoop. Balloons not included.',                                     'Black', '#2B2B2B', 30.00, 4),
-(15, 6, 'Red white and blue banner','Pleated fan bunting, set of 5.',                                                     'Red, white, blue', '#B22234', 10.00, 12);
+(15, 5, 'Red white and blue banner','Pleated fan bunting, set of 5.',                                                     'Red, white, blue', '#B22234', 10.00, 12);
 
 INSERT INTO packages (id, name, event_type, description, price, color_hex) VALUES
 (1, 'Quince glow',      'Quinceañera',
