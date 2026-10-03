@@ -1,0 +1,10 @@
+# Local and editor files
+.vscode/
+.idea/
+*.log
+.DS_Store
+Thumbs.db
+
+# Never commit real secrets
+.env
+config/config.local.php
