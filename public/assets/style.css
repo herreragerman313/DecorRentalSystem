@@ -1,4 +1,4 @@
-/* Encore Decor styles
+/* Zero Waste Event Design styles
    Colors: plum ink for text, marigold for the one big moment (the event date),
    sage and berry only for "available" and "booked". */
 
@@ -172,7 +172,9 @@ main { padding-block: 2rem 4rem; min-height: 60vh; }
   text-decoration: none; color: var(--ink);
 }
 .chip-card:hover { border-color: var(--plum); color: var(--ink); }
-.chip-card.is-full { opacity: 0.55; }
+.chip-card.is-full .swatch { opacity: 0.35; }
+.chip-card.is-full .chip-title,
+.chip-card.is-full .chip-price { color: var(--muted); }
 .chip-body { display: flex; flex-direction: column; gap: 0.15rem; padding: 0.8rem 0.9rem 1rem; }
 .chip-kicker { font-size: 0.85rem; color: var(--muted); }
 .chip-title { font: 700 1.15rem/1.2 var(--display); }
@@ -326,6 +328,48 @@ td .inline + a { margin-left: 0.6rem; }
 .site-footer { background: var(--ink); color: #E9E1EE; padding-block: 2.5rem; }
 .site-footer p { margin-bottom: 0.5rem; }
 .site-footer .small { color: #B9AEC2; }
+
+/* ---------- Setup service choice ---------- */
+.service-choice { border: 1px solid var(--line); border-radius: var(--radius); padding: 0.75rem 1rem 1rem; margin: 0; }
+.service-choice legend { font-weight: 700; padding: 0 0.3rem; }
+.stack-form .choice { flex-direction: row; align-items: flex-start; gap: 0.6rem; font-weight: 400; padding: 0.5rem 0; cursor: pointer; }
+.choice input { margin-top: 0.25rem; accent-color: var(--plum); width: 1.1rem; height: 1.1rem; }
+.choice small { display: block; color: var(--muted); }
+.choice .fee { color: var(--plum); font-weight: 700; }
+.address-field { margin-top: 0.4rem; }
+.perk { background: var(--sage-soft); color: var(--sage); font-weight: 700; padding: 0.5rem 0.8rem; border-radius: var(--radius); }
+
+/* ---------- Package extras ---------- */
+.extras { border: 1px solid var(--line); border-radius: var(--radius); padding: 0.75rem 1rem; }
+.extras summary { cursor: pointer; font-weight: 700; color: var(--plum); }
+.extra-list { list-style: none; padding: 0; margin: 0.5rem 0 0; max-height: 18rem; overflow-y: auto; }
+.extra-list li { display: grid; grid-template-columns: auto 1fr 5rem; gap: 0.6rem; align-items: center; padding: 0.4rem 0; border-bottom: 1px solid var(--line); }
+.extra-list label { font-weight: 400; }
+.extra-list small { display: block; color: var(--muted); }
+.extra-list input { width: 5rem; }
+
+/* ---------- Seasons, shop, impact ---------- */
+.season-tag { display: inline-block; background: #FFF4E2; color: #8A5A0B; font-weight: 700; font-size: 0.85rem; padding: 0.15rem 0.5rem; border-radius: 3px; }
+p.season-tag { margin-bottom: 0.5rem; }
+.reuse-count { margin-top: 2rem; padding-top: 1rem; border-top: 3px solid var(--sage); color: var(--muted); max-width: 52ch; }
+.reuse-count strong { display: block; font: 800 2.5rem/1 var(--display); color: var(--sage); }
+.impact { background: var(--white); border: 1px solid var(--line); border-left: 4px solid var(--sage); border-radius: var(--radius); padding: 1rem 1.25rem 0.25rem; margin-bottom: 1.5rem; }
+.impact strong { color: var(--sage); font-size: 1.3rem; }
+.impact-line { color: var(--sage); font-weight: 700; }
+.perk-list { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--gap); grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+.perk-list li { border-top: 3px solid var(--sage); padding-top: 0.75rem; }
+.perk-list strong { display: block; }
+.buy-box { border-left: 4px solid var(--marigold); }
+.card-link { display: block; }
+a.chip-title { color: var(--ink); text-decoration: none; }
+a.chip-title:hover { color: var(--plum); text-decoration: underline; }
+.buy-row { margin: 0.5rem 0 0.2rem; }
+.buy-row input { width: 4.5rem; }
+.status-order-pending { background: #FFF4E2; color: #8A5A0B; }
+.status-order-ready { background: var(--plum-soft); color: var(--plum); }
+.status-order-completed { background: var(--sage-soft); color: var(--sage); }
+.status-order-cancelled { background: #EEEAF0; color: var(--muted); }
+.section-head span .btn + .btn { margin-left: 0.4rem; }
 
 /* ---------- Small screens ---------- */
 @media (max-width: 760px) {

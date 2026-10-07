@@ -30,13 +30,28 @@ $date = $_GET['date'] ?? '';
 $dateError = $date !== '' ? check_event_date($date) : null;
 $hasDate = $date !== '' && $dateError === null;
 $short = [];
+$extras = [];
 if ($hasDate) {
     [$pickup, $return] = rental_window($date);
-    $booked = booked_quantities($pickup, $return, array_column($pieces, 'id'));
+    $booked = booked_quantities($pickup, $return);
     foreach ($pieces as $p) {
         $free = (int) $p['owned'] - ($booked[(int) $p['id']] ?? 0);
         if ($free < (int) $p['quantity']) {
             $short[] = $p['name'];
+        }
+    }
+
+    // Everything else that's free that day, so people can customize the package
+    $inPackage = [];
+    foreach ($pieces as $p) {
+        $inPackage[(int) $p['id']] = (int) $p['quantity'];
+    }
+    $all = db()->query('SELECT id, name, price, quantity, color_hex FROM items WHERE is_active = 1 ORDER BY name')->fetchAll();
+    foreach ($all as $it) {
+        $free = (int) $it['quantity'] - ($booked[(int) $it['id']] ?? 0) - ($inPackage[(int) $it['id']] ?? 0);
+        if ($free > 0) {
+            $it['free'] = $free;
+            $extras[] = $it;
         }
     }
 }
@@ -55,7 +70,8 @@ require __DIR__ . '/../includes/header.php';
 
   <div class="detail-info">
     <h1><?= e($package['name']) ?></h1>
-    <p class="price-line"><?= money($package['price']) ?> for the whole setup
+    <?php if ($package['season']): ?><p class="season-tag"><?= e($package['season']) ?> collection</p><?php endif; ?>
+    <p class="price-line"><?= money($package['price']) ?> for everything below
       <?php if ($separateTotal > $package['price']): ?>
         <span class="muted">(<?= money($separateTotal - $package['price']) ?> less than renting each piece)</span>
       <?php endif; ?>
@@ -87,15 +103,32 @@ require __DIR__ . '/../includes/header.php';
         <p class="avail avail-no">Not enough for <?= e(nice_date($date)) ?>: <?= e(implode(', ', $short)) ?>. Try another date or rent pieces one by one.</p>
       <?php elseif ($hasDate): ?>
         <p class="avail avail-yes">Everything is free for <?= e(nice_date($date)) ?></p>
-        <p class="small">Pickup <?= e(nice_date($pickup)) ?>. Return <?= e(nice_date($return)) ?>.</p>
-        <form method="post" action="<?= e(url('book.php')) ?>" class="stack-form">
+        <p class="small">Held for you <?= e(nice_date($pickup)) ?> through <?= e(nice_date($return)) ?>.</p>
+        <form method="post" action="<?= e(url('book.php')) ?>" class="stack-form" data-package-price="<?= e($package['price']) ?>">
           <?= csrf_field() ?>
           <input type="hidden" name="type" value="package">
           <input type="hidden" name="id" value="<?= $id ?>">
           <input type="hidden" name="date" value="<?= e($date) ?>">
+
+          <details class="extras">
+            <summary>Make it yours: add extra pieces</summary>
+            <p class="small">Extras are added at their normal rental price. Only what's free on your date is shown.</p>
+            <ul class="extra-list">
+              <?php foreach ($extras as $x): ?>
+                <li>
+                  <span class="dot" style="--swatch: <?= e($x['color_hex']) ?>"></span>
+                  <label for="extra-<?= (int) $x['id'] ?>"><?= e($x['name']) ?> <small><?= money($x['price']) ?> each, <?= (int) $x['free'] ?> free</small></label>
+                  <input id="extra-<?= (int) $x['id'] ?>" type="number" name="extra[<?= (int) $x['id'] ?>]" value="0" min="0" max="<?= (int) $x['free'] ?>" data-extra-price="<?= e($x['price']) ?>">
+                </li>
+              <?php endforeach; ?>
+            </ul>
+          </details>
+
+          <?= service_fields((float) $package['setup_fee']) ?>
           <label>Notes for us (optional)
-            <textarea name="notes" rows="2" maxlength="500" placeholder="Names for marquee letters, venue, anything else"></textarea>
+            <textarea name="notes" rows="2" maxlength="500" placeholder="Names for marquee letters, colors, anything else"></textarea>
           </label>
+          <p class="total">Total before any discount <strong data-total><?= money($package['price']) ?></strong></p>
           <button type="submit" class="btn btn-big">Request this package</button>
         </form>
       <?php endif; ?>

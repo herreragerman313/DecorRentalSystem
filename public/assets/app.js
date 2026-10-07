@@ -23,13 +23,37 @@ document.querySelectorAll('[data-checklist]').forEach(function (box) {
   update();
 });
 
-// Live total when changing quantity
-document.querySelectorAll('form[data-price]').forEach(function (form) {
-  var price = parseFloat(form.dataset.price);
-  var qty = form.querySelector('[data-qty]');
+// Live total: item price x quantity, or package price + extras, plus setup fee
+document.querySelectorAll('form[data-price], form[data-package-price]').forEach(function (form) {
   var total = form.querySelector('[data-total]');
-  qty.addEventListener('input', function () {
-    var n = Math.max(1, parseInt(qty.value, 10) || 1);
-    total.textContent = '$' + (price * n).toFixed(2);
-  });
+  var qty = form.querySelector('[data-qty]');
+  var extras = form.querySelectorAll('[data-extra-price]');
+  var setup = form.querySelector('input[name=service][value=setup]');
+  var address = form.querySelector('[data-address]');
+  var addressInput = address ? address.querySelector('input') : null;
+
+  function update() {
+    var sum = 0;
+    if (form.dataset.price) {
+      sum = parseFloat(form.dataset.price) * Math.max(1, parseInt(qty.value, 10) || 1);
+    } else {
+      sum = parseFloat(form.dataset.packagePrice);
+    }
+    extras.forEach(function (input) {
+      sum += parseFloat(input.dataset.extraPrice) * Math.max(0, parseInt(input.value, 10) || 0);
+    });
+    var wantsSetup = setup && setup.checked;
+    if (wantsSetup) {
+      sum += parseFloat(setup.dataset.fee);
+    }
+    if (address) {
+      address.hidden = !wantsSetup;
+      addressInput.required = wantsSetup;
+    }
+    total.textContent = '$' + sum.toFixed(2);
+  }
+
+  form.addEventListener('input', update);
+  form.addEventListener('change', update);
+  update();
 });

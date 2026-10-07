@@ -1,32 +1,47 @@
 # DecorRentalSystem
 
-A full stack event decoration rental website built with PHP, MySQL, HTML, and CSS.
-Customers pick their event date, see what decor is free that day, and request a rental.
-Pickup is the day before the event and return is the day after.
+Website for **Zero Waste Event Design Services**, our ENT 310 business at CSUN
+(Zayli Tellez, Neria Arinda, Joshua Mineros, and German Herrera). Built with PHP,
+MySQL, HTML, and CSS, and also used as practice for my CIT 480 senior project.
 
-Built as a prototype for my ENT 310 business project at CSUN and as practice for my
-CIT 480 senior project. The store name "Encore Decor" is a placeholder.
+The business replaces throwaway party decorations with stylish, reusable ones.
+We rent and set up reusable decor, and we also sell some pieces.
 
 ## Features
 
 **Customers**
 - Sign up and log in
 - Browse decor by category, search, and event date with live availability
-- Ready made packages for quinceañeras, weddings, birthdays, and Fourth of July
-- Request a rental for a single item or a full package
-- My rentals page with status tracking and cancellation
-- Packing checklist for returning items
+- Themed packages for quinceañeras, weddings, birthdays, and holidays
+- Customize any package by adding extra pieces
+- Choose pickup, or have our team set it up and take it down (setup fee)
+- Seasonal collections highlighted on the home page
+- Buy some pieces to keep from the Shop page
+- Returning customers save 10% on every rental after their first one
+- Reuse counter showing how many pieces were reused instead of thrown away
+- My rentals page with status tracking, cancellation, orders, and a packing checklist
 
 **Admin**
 - Dashboard with rentals waiting, pickups this week, items out, and late returns
 - Move rentals through Requested, Confirmed, Picked up, Returned, or Cancelled
-- Add, edit, hide, and show items
+- Setup rentals show the event address and use "Set up" and "Taken down" steps
+- Shop orders page: mark orders ready, picked up, or cancel (stock goes back)
+- Add, edit, hide, and show items, including sale price and stock
 
 **Booking rules**
-- Items are held from the day before the event to the day after
+- Items are held from the day before the event to the day after, for pickup or setup
+- Rental stock and sale stock are tracked separately, so selling a piece never breaks a booking
 - No double booking: item rows are locked during booking (`SELECT ... FOR UPDATE`)
   so two people can't book the last unit at the same moment
 - Events need at least 2 days notice and can be booked up to a year ahead
+
+## Pricing
+
+Prices were checked against Los Angeles rental companies in October 2026.
+We stay below budget local shops (for example, a 120" round tablecloth is $12
+here vs about $15 to $16 elsewhere), and our setup fee includes delivery,
+setup, and takedown, while most competitors charge about $100 just to deliver.
+Packages cost about 10 to 15% less than renting each piece on its own.
 
 ## Security
 
@@ -69,10 +84,16 @@ C:\xampp\php\php.exe -S localhost:8000 -t public
 
 Keep PowerShell open while you use the site. Press Ctrl+C to stop it.
 
-**Admin login:** `admin@encoredecor.test` / `ChangeMe123!`
-Change this before putting the site online.
+**Logins** (password for both is `ChangeMe123!`):
+- Admin: `admin@zerowaste.test`
+- Returning customer with past rentals: `demo@zerowaste.test`
+
+Change these before putting the site online.
 
 ## Settings
+
+Business rules (setup fee for single items and the loyalty discount) are at the
+top of `config/config.php`. Package setup fees are set per package in the database.
 
 Defaults are in `config/config.php` and match a fresh XAMPP install
 (user `root`, no password). On a real server, set these as environment
@@ -80,7 +101,7 @@ variables instead so no passwords go on GitHub:
 
 | Variable    | What it is                     |
 |-------------|--------------------------------|
-| SITE_NAME   | Store name shown on the site   |
+| SITE_NAME   | Business name shown on the site |
 | DB_HOST     | Database server address        |
 | DB_PORT     | Usually 3306                   |
 | DB_NAME     | decor_rental                   |
@@ -101,7 +122,8 @@ variables instead so no passwords go on GitHub:
 
 ## Ideas for next features
 
-- Admin page to create and edit packages
+- Admin page to create and edit packages and seasons
 - Photo uploads for items
 - Email confirmation when a rental is confirmed
 - Late fee tracking
+- Links to our Etsy and Amazon listings

@@ -29,6 +29,7 @@ function nav_link(string $path, string $label, bool $active): string
     <nav class="main-nav" aria-label="Main">
       <?= nav_link('items.php', 'Browse decor', !$inAdmin && in_array($here, ['items.php', 'item.php'])) ?>
       <?= nav_link('packages.php', 'Packages', !$inAdmin && in_array($here, ['packages.php', 'package.php'])) ?>
+      <?= nav_link('shop.php', 'Shop', !$inAdmin && $here === 'shop.php') ?>
       <?php if ($user): ?>
         <?= nav_link('my-rentals.php', 'My rentals', !$inAdmin && in_array($here, ['my-rentals.php', 'rental.php'])) ?>
         <?php if ($user['role'] === 'admin'): ?>

@@ -34,11 +34,13 @@ $stats = db()->query("SELECT
     SUM(status = 'picked_up' AND return_date < CURDATE()) AS late
   FROM rentals")->fetch();
 
+$openOrders = (int) db()->query("SELECT COUNT(*) FROM orders WHERE status IN ('pending','ready')")->fetchColumn();
+
 // What each status is allowed to move to next
 $next = [
     'pending'   => ['confirmed' => 'Confirm', 'cancelled' => 'Cancel'],
-    'confirmed' => ['picked_up' => 'Mark picked up', 'cancelled' => 'Cancel'],
-    'picked_up' => ['returned' => 'Mark returned'],
+    'confirmed' => ['picked_up' => 'Mark out', 'cancelled' => 'Cancel'],
+    'picked_up' => ['returned' => 'Mark back'],
 ];
 
 $pageTitle = 'Admin';
@@ -47,13 +49,16 @@ require __DIR__ . '/../../includes/header.php';
 
 <div class="section-head">
   <h1>Rentals</h1>
-  <a class="btn btn-ghost" href="<?= e(url('admin/items.php')) ?>">Manage items</a>
+  <span>
+    <a class="btn btn-ghost" href="<?= e(url('admin/orders.php')) ?>">Shop orders<?= $openOrders ? ' (' . $openOrders . ')' : '' ?></a>
+    <a class="btn btn-ghost" href="<?= e(url('admin/items.php')) ?>">Manage items</a>
+  </span>
 </div>
 
 <div class="stats">
   <div><strong><?= (int) $stats['waiting'] ?></strong> waiting for you to confirm</div>
   <div><strong><?= (int) $stats['pickups_week'] ?></strong> pickups in the next 7 days</div>
-  <div><strong><?= (int) $stats['out_now'] ?></strong> out with customers</div>
+  <div><strong><?= (int) $stats['out_now'] ?></strong> out at events now</div>
   <div class="<?= $stats['late'] > 0 ? 'stat-alert' : '' ?>"><strong><?= (int) $stats['late'] ?></strong> late returns</div>
 </div>
 
@@ -69,7 +74,7 @@ require __DIR__ . '/../../includes/header.php';
   <div class="table-wrap">
     <table>
       <thead>
-        <tr><th>#</th><th>Customer</th><th>What</th><th>Pickup</th><th>Return</th><th>Total</th><th>Status</th><th>Update</th></tr>
+        <tr><th>#</th><th>Customer</th><th>What</th><th>Service</th><th>Pickup</th><th>Return</th><th>Total</th><th>Status</th><th>Update</th></tr>
       </thead>
       <tbody>
         <?php foreach ($rentals as $r):
@@ -78,12 +83,16 @@ require __DIR__ . '/../../includes/header.php';
             <td><a href="<?= e(url('rental.php?id=' . $r['id'])) ?>"><?= (int) $r['id'] ?></a></td>
             <td><?= e($r['customer']) ?></td>
             <td><?= e($r['package_name'] ? $r['package_name'] . ' package' : $r['item_list']) ?></td>
+            <td><?= $r['service'] === 'setup' ? '<strong>We set up</strong><br><span class="small">' . e($r['address']) . '</span>' : 'Customer pickup' ?></td>
             <td><?= e(date('M j', strtotime($r['pickup_date']))) ?></td>
             <td class="<?= $isLate ? 'late' : '' ?>"><?= e(date('M j', strtotime($r['return_date']))) ?><?= $isLate ? ' (late)' : '' ?></td>
             <td><?= money($r['total_price']) ?></td>
-            <td><span class="status status-<?= e($r['status']) ?>"><?= e(status_label($r['status'])) ?></span></td>
+            <td><span class="status status-<?= e($r['status']) ?>"><?= e(status_label($r['status'], $r['service'] === 'setup')) ?></span></td>
             <td>
-              <?php foreach ($next[$r['status']] ?? [] as $to => $label): ?>
+              <?php foreach ($next[$r['status']] ?? [] as $to => $label):
+                  $setup = $r['service'] === 'setup';
+                  if ($to === 'picked_up') { $label = $setup ? 'Mark set up' : 'Mark picked up'; }
+                  if ($to === 'returned')  { $label = $setup ? 'Mark taken down' : 'Mark returned'; } ?>
                 <form method="post" action="<?= e(url('admin/update-rental.php')) ?>" class="inline"<?= $to === 'cancelled' ? ' data-confirm="Cancel rental #' . (int) $r['id'] . '?"' : '' ?>>
                   <?= csrf_field() ?>
                   <input type="hidden" name="id" value="<?= (int) $r['id'] ?>">

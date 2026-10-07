@@ -2,7 +2,11 @@
 // Site settings. On AWS, set these as environment variables instead of
 // editing this file, so real passwords never end up on GitHub.
 
-define('SITE_NAME', getenv('SITE_NAME') ?: 'Encore Decor');
+define('SITE_NAME', getenv('SITE_NAME') ?: 'Zero Waste Event Design');
+
+// Business rules
+define('ITEM_SETUP_FEE', 75.00);   // setup fee when someone rents single items (packages have their own)
+define('LOYALTY_PERCENT', 10);     // returning customers save this % on rentals after their first return
 
 define('DB_HOST', getenv('DB_HOST') ?: '127.0.0.1');
 define('DB_PORT', getenv('DB_PORT') ?: '3306');

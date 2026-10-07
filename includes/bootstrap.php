@@ -76,13 +76,13 @@ function nice_date(string $date): string
     return date('D, M j, Y', strtotime($date));
 }
 
-function status_label(string $status): string
+function status_label(string $status, bool $setup = false): string
 {
     return [
         'pending'   => 'Waiting for confirmation',
         'confirmed' => 'Confirmed',
-        'picked_up' => 'Picked up',
-        'returned'  => 'Returned',
+        'picked_up' => $setup ? 'Set up' : 'Picked up',
+        'returned'  => $setup ? 'Taken down' : 'Returned',
         'cancelled' => 'Cancelled',
     ][$status] ?? $status;
 }
@@ -172,3 +172,35 @@ function login_user(int $userId): void
 }
 
 require_once __DIR__ . '/availability.php';
+
+// ---------- Shared form parts ----------
+
+// The "how do you want it" choice on item and package pages
+function service_fields(float $setupFee): string
+{
+    ob_start(); ?>
+    <fieldset class="service-choice" data-service>
+      <legend>How do you want it?</legend>
+      <label class="choice">
+        <input type="radio" name="service" value="pickup" checked>
+        <span><strong>I'll pick it up</strong>
+          <small>Pick up the day before, return the day after.</small></span>
+      </label>
+      <label class="choice">
+        <input type="radio" name="service" value="setup" data-fee="<?= e((string) $setupFee) ?>">
+        <span><strong>You set it up for me</strong> <span class="fee">+<?= money($setupFee) ?></span>
+          <small>Our team decorates before the event and takes it all down after.</small></span>
+      </label>
+      <label class="address-field" data-address>Event address (only if we set it up)
+        <input type="text" name="address" maxlength="255" autocomplete="street-address" placeholder="Street, city">
+      </label>
+    </fieldset>
+    <?php
+    $user = current_user();
+    if ($user && gets_loyalty_discount((int) $user['id'])): ?>
+      <p class="perk">Welcome back. You save <?= (int) LOYALTY_PERCENT ?>% on this rental.</p>
+    <?php elseif (!$user || $user['role'] !== 'admin'): ?>
+      <p class="small">Returning customers save <?= (int) LOYALTY_PERCENT ?>% on every rental after their first one.</p>
+    <?php endif;
+    return ob_get_clean();
+}

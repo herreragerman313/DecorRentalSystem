@@ -31,7 +31,7 @@ require __DIR__ . '/../../includes/header.php';
 <div class="table-wrap">
   <table>
     <thead>
-      <tr><th></th><th>Name</th><th>Category</th><th>Price</th><th>Owned</th><th>Out now</th><th>On site</th><th></th></tr>
+      <tr><th></th><th>Name</th><th>Category</th><th>Rent</th><th>Owned</th><th>For sale</th><th>Out now</th><th>On site</th><th></th></tr>
     </thead>
     <tbody>
       <?php foreach ($items as $item): ?>
@@ -41,6 +41,7 @@ require __DIR__ . '/../../includes/header.php';
           <td><?= e($item['category']) ?></td>
           <td><?= money($item['price']) ?></td>
           <td><?= (int) $item['quantity'] ?></td>
+          <td><?= $item['sale_price'] !== null ? money($item['sale_price']) . ' (' . (int) $item['sale_stock'] . ' left)' : 'No' ?></td>
           <td><?= (int) $item['out_now'] ?></td>
           <td><?= $item['is_active'] ? 'Shown' : 'Hidden' ?></td>
           <td>

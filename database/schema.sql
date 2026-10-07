@@ -7,6 +7,8 @@ CREATE DATABASE IF NOT EXISTS decor_rental
 
 USE decor_rental;
 
+DROP TABLE IF EXISTS order_items;
+DROP TABLE IF EXISTS orders;
 DROP TABLE IF EXISTS rental_items;
 DROP TABLE IF EXISTS rentals;
 DROP TABLE IF EXISTS package_items;
@@ -39,8 +41,10 @@ CREATE TABLE items (
   description TEXT NOT NULL,
   color_name  VARCHAR(40)  NOT NULL DEFAULT 'Assorted',
   color_hex   CHAR(7)      NOT NULL DEFAULT '#CCCCCC',
-  price       DECIMAL(8,2) NOT NULL,          -- price per event, per unit
-  quantity    INT NOT NULL DEFAULT 1,         -- units we own
+  price       DECIMAL(8,2) NOT NULL,          -- rental price per event, per unit
+  quantity    INT NOT NULL DEFAULT 1,         -- units we own for renting
+  sale_price  DECIMAL(8,2) NULL,              -- set this to also sell the item
+  sale_stock  INT NOT NULL DEFAULT 0,         -- units for sale (separate from rental stock)
   image_url   VARCHAR(500) NULL,
   is_active   TINYINT(1) NOT NULL DEFAULT 1,
   created_at  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -54,6 +58,8 @@ CREATE TABLE packages (
   event_type  VARCHAR(60)  NOT NULL,
   description TEXT NOT NULL,
   price       DECIMAL(8,2) NOT NULL,
+  setup_fee   DECIMAL(8,2) NOT NULL DEFAULT 75.00, -- our price to set up and take down
+  season      VARCHAR(40) NULL,                    -- e.g. 'Fall 2026' for seasonal collections
   color_hex   CHAR(7) NOT NULL DEFAULT '#CCCCCC',
   is_active   TINYINT(1) NOT NULL DEFAULT 1
 ) ENGINE=InnoDB;
@@ -75,8 +81,13 @@ CREATE TABLE rentals (
   event_date  DATE NOT NULL,
   pickup_date DATE NOT NULL,
   return_date DATE NOT NULL,
+  service     ENUM('pickup','setup') NOT NULL DEFAULT 'pickup', -- setup = our team decorates
+  address     VARCHAR(255) NULL,                                -- event address for setup
   status      ENUM('pending','confirmed','picked_up','returned','cancelled')
               NOT NULL DEFAULT 'pending',
+  subtotal    DECIMAL(10,2) NOT NULL,
+  setup_fee   DECIMAL(8,2)  NOT NULL DEFAULT 0,
+  discount    DECIMAL(8,2)  NOT NULL DEFAULT 0,                 -- returning customer discount
   total_price DECIMAL(10,2) NOT NULL,
   notes       VARCHAR(500) NULL,
   created_at  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -95,4 +106,24 @@ CREATE TABLE rental_items (
   unit_price DECIMAL(8,2) NOT NULL,
   FOREIGN KEY (rental_id) REFERENCES rentals(id) ON DELETE CASCADE,
   FOREIGN KEY (item_id)   REFERENCES items(id)
+) ENGINE=InnoDB;
+
+-- Pieces customers buy to keep
+CREATE TABLE orders (
+  id          INT AUTO_INCREMENT PRIMARY KEY,
+  user_id     INT NOT NULL,
+  status      ENUM('pending','ready','completed','cancelled') NOT NULL DEFAULT 'pending',
+  total_price DECIMAL(10,2) NOT NULL,
+  created_at  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id)
+) ENGINE=InnoDB;
+
+CREATE TABLE order_items (
+  id         INT AUTO_INCREMENT PRIMARY KEY,
+  order_id   INT NOT NULL,
+  item_id    INT NOT NULL,
+  quantity   INT NOT NULL,
+  unit_price DECIMAL(8,2) NOT NULL,
+  FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE,
+  FOREIGN KEY (item_id)  REFERENCES items(id)
 ) ENGINE=InnoDB;

@@ -71,7 +71,7 @@ require __DIR__ . '/../includes/header.php';
         <p class="avail avail-no">Booked for <?= e(nice_date($date)) ?>. Try a different date.</p>
       <?php elseif ($hasDate): ?>
         <p class="avail avail-yes"><?= $free ?> free for <?= e(nice_date($date)) ?></p>
-        <p class="small">Pickup <?= e(nice_date($pickup)) ?>. Return <?= e(nice_date($return)) ?>.</p>
+        <p class="small">Held for you <?= e(nice_date($pickup)) ?> through <?= e(nice_date($return)) ?>.</p>
 
         <form method="post" action="<?= e(url('book.php')) ?>" class="stack-form" data-price="<?= e($item['price']) ?>">
           <?= csrf_field() ?>
@@ -81,14 +81,33 @@ require __DIR__ . '/../includes/header.php';
           <label>How many
             <input type="number" name="quantity" value="1" min="1" max="<?= $free ?>" required data-qty>
           </label>
+          <?= service_fields(ITEM_SETUP_FEE) ?>
           <label>Notes for us (optional)
             <textarea name="notes" rows="2" maxlength="500" placeholder="Colors, venue, anything we should know"></textarea>
           </label>
-          <p class="total">Total <strong data-total><?= money($item['price']) ?></strong></p>
+          <p class="total">Total before any discount <strong data-total><?= money($item['price']) ?></strong></p>
           <button type="submit" class="btn btn-big">Request this rental</button>
         </form>
       <?php endif; ?>
     </div>
+
+    <?php if ($item['sale_price'] !== null): ?>
+      <div class="book-box buy-box">
+        <h2>Want to keep it?</h2>
+        <?php if ((int) $item['sale_stock'] > 0): ?>
+          <p>Buy one for <?= money($item['sale_price']) ?>. Pick it up at our next pop up or by appointment. <?= (int) $item['sale_stock'] ?> left.</p>
+          <form method="post" action="<?= e(url('buy.php')) ?>" class="row-form">
+            <?= csrf_field() ?>
+            <input type="hidden" name="id" value="<?= $id ?>">
+            <label class="sr-only" for="buy-qty">How many to buy</label>
+            <input id="buy-qty" type="number" name="quantity" value="1" min="1" max="<?= (int) $item['sale_stock'] ?>" required>
+            <button type="submit" class="btn btn-ghost">Buy to keep</button>
+          </form>
+        <?php else: ?>
+          <p class="muted">Sold out for now. You can still rent it.</p>
+        <?php endif; ?>
+      </div>
+    <?php endif; ?>
 
     <?php if ($inPackages): ?>
       <p class="muted">Also part of:

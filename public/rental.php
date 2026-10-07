@@ -30,7 +30,10 @@ $pieceCount = array_sum(array_column($lines, 'quantity'));
 
 $canCancel = in_array($rental['status'], ['pending', 'confirmed']) && $rental['pickup_date'] > date('Y-m-d');
 
-$steps = ['pending' => 'Requested', 'confirmed' => 'Confirmed', 'picked_up' => 'Picked up', 'returned' => 'Returned'];
+$isSetup = $rental['service'] === 'setup';
+$steps = $isSetup
+    ? ['pending' => 'Requested', 'confirmed' => 'Confirmed', 'picked_up' => 'Set up', 'returned' => 'Taken down']
+    : ['pending' => 'Requested', 'confirmed' => 'Confirmed', 'picked_up' => 'Picked up', 'returned' => 'Returned'];
 $stepKeys = array_keys($steps);
 $currentStep = array_search($rental['status'], $stepKeys, true);
 
@@ -45,7 +48,7 @@ require __DIR__ . '/../includes/header.php';
     <h1><?= e($rental['package_name'] ?: 'Rental #' . $id) ?></h1>
     <p class="price-line">For your event on <?= e(nice_date($rental['event_date'])) ?></p>
   </div>
-  <span class="status status-<?= e($rental['status']) ?>"><?= e(status_label($rental['status'])) ?></span>
+  <span class="status status-<?= e($rental['status']) ?>"><?= e(status_label($rental['status'], $isSetup)) ?></span>
 </div>
 
 <?php if ($rental['status'] === 'cancelled'): ?>
@@ -61,13 +64,27 @@ require __DIR__ . '/../includes/header.php';
 
 <div class="rental-grid">
   <section class="card">
-    <h2>Dates</h2>
+    <h2>Details</h2>
     <dl class="facts">
-      <dt>Pickup</dt><dd><?= e(nice_date($rental['pickup_date'])) ?></dd>
-      <dt>Event</dt><dd><?= e(nice_date($rental['event_date'])) ?></dd>
-      <dt>Return by</dt><dd><?= e(nice_date($rental['return_date'])) ?></dd>
+      <?php if ($isSetup): ?>
+        <dt>Service</dt><dd>We set it up and take it down</dd>
+        <dt>Where</dt><dd><?= e($rental['address']) ?></dd>
+        <dt>Event</dt><dd><?= e(nice_date($rental['event_date'])) ?></dd>
+      <?php else: ?>
+        <dt>Pickup</dt><dd><?= e(nice_date($rental['pickup_date'])) ?></dd>
+        <dt>Event</dt><dd><?= e(nice_date($rental['event_date'])) ?></dd>
+        <dt>Return by</dt><dd><?= e(nice_date($rental['return_date'])) ?></dd>
+      <?php endif; ?>
+      <dt>Decor</dt><dd><?= money($rental['subtotal']) ?></dd>
+      <?php if ((float) $rental['setup_fee'] > 0): ?>
+        <dt>Setup and takedown</dt><dd><?= money($rental['setup_fee']) ?></dd>
+      <?php endif; ?>
+      <?php if ((float) $rental['discount'] > 0): ?>
+        <dt>Returning customer</dt><dd>&minus;<?= money($rental['discount']) ?></dd>
+      <?php endif; ?>
       <dt>Total</dt><dd><?= money($rental['total_price']) ?></dd>
     </dl>
+    <p class="impact-line"><?= (int) $pieceCount ?> reusable <?= $pieceCount == 1 ? 'piece' : 'pieces' ?> that nobody has to buy for one night and throw away.</p>
     <?php if ($rental['notes']): ?>
       <p class="muted">Your notes: <?= e($rental['notes']) ?></p>
     <?php endif; ?>
@@ -85,8 +102,8 @@ require __DIR__ . '/../includes/header.php';
   </section>
 
   <section class="card checklist" data-checklist>
-    <h2>Packing checklist</h2>
-    <p class="muted">Check things off as you pack them up after your event. <span data-count>0</span> of <?= count($lines) ?> done, <?= (int) $pieceCount ?> pieces total.</p>
+    <h2><?= $isSetup ? 'What we bring' : 'Packing checklist' ?></h2>
+    <p class="muted"><?= $isSetup ? 'Our team checks these off at setup and takedown.' : 'Check things off as you pack them up after your event.' ?> <span data-count>0</span> of <?= count($lines) ?> done, <?= (int) $pieceCount ?> pieces total.</p>
     <ul>
       <?php foreach ($lines as $line): ?>
         <li>

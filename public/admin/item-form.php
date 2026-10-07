@@ -5,7 +5,7 @@ require_admin();
 $id = (int) ($_GET['id'] ?? 0);
 $item = [
     'category_id' => '', 'name' => '', 'description' => '', 'color_name' => '',
-    'color_hex' => '#CCCCCC', 'price' => '', 'quantity' => 1, 'image_url' => '',
+    'color_hex' => '#CCCCCC', 'price' => '', 'quantity' => 1, 'image_url' => '', 'sale_price' => '', 'sale_stock' => 0,
 ];
 
 if ($id) {
@@ -31,6 +31,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $item['price']       = $_POST['price'] ?? '';
     $item['quantity']    = (int) ($_POST['quantity'] ?? 0);
     $item['image_url']   = trim($_POST['image_url'] ?? '');
+    $item['sale_price']  = trim($_POST['sale_price'] ?? '');
+    $item['sale_stock']  = (int) ($_POST['sale_stock'] ?? 0);
 
     $stmt = db()->prepare('SELECT COUNT(*) FROM categories WHERE id = ?');
     $stmt->execute([$item['category_id']]);
@@ -55,6 +57,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($item['quantity'] < 0) {
         $errors[] = 'How many you own can not be negative.';
     }
+    if ($item['sale_price'] !== '' && (!is_numeric($item['sale_price']) || $item['sale_price'] < 0)) {
+        $errors[] = 'Sale price has to be a number, or leave it empty if it is rent only.';
+    }
+    if ($item['sale_stock'] < 0) {
+        $errors[] = 'Units for sale can not be negative.';
+    }
     if ($item['image_url'] !== '' && !filter_var($item['image_url'], FILTER_VALIDATE_URL)) {
         $errors[] = 'Photo link has to be a full web address, or leave it empty.';
     }
@@ -63,15 +71,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $values = [
             $item['category_id'], $item['name'], $item['description'], $item['color_name'],
             $item['color_hex'], $item['price'], $item['quantity'], $item['image_url'] ?: null,
+            $item['sale_price'] === '' ? null : $item['sale_price'],
+            $item['sale_price'] === '' ? 0 : $item['sale_stock'],
         ];
         if ($id) {
             $stmt = db()->prepare('UPDATE items SET category_id = ?, name = ?, description = ?, color_name = ?,
-                                   color_hex = ?, price = ?, quantity = ?, image_url = ? WHERE id = ?');
+                                   color_hex = ?, price = ?, quantity = ?, image_url = ?,
+                                   sale_price = ?, sale_stock = ? WHERE id = ?');
             $stmt->execute(array_merge($values, [$id]));
             flash('success', 'Saved changes to ' . $item['name'] . '.');
         } else {
-            $stmt = db()->prepare('INSERT INTO items (category_id, name, description, color_name, color_hex, price, quantity, image_url)
-                                   VALUES (?, ?, ?, ?, ?, ?, ?, ?)');
+            $stmt = db()->prepare('INSERT INTO items (category_id, name, description, color_name, color_hex, price, quantity, image_url, sale_price, sale_stock)
+                                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
             $stmt->execute($values);
             flash('success', 'Added ' . $item['name'] . '.');
         }
@@ -108,8 +119,12 @@ require __DIR__ . '/../../includes/header.php';
     <label>Swatch <input type="color" name="color_hex" value="<?= e($item['color_hex']) ?>"></label>
   </div>
   <div class="two-col">
-    <label>Price per event <input type="number" name="price" value="<?= e((string) $item['price']) ?>" min="0" step="0.01" required></label>
-    <label>How many we own <input type="number" name="quantity" value="<?= (int) $item['quantity'] ?>" min="0" required></label>
+    <label>Rental price per event <input type="number" name="price" value="<?= e((string) $item['price']) ?>" min="0" step="0.01" required></label>
+    <label>How many we rent out <input type="number" name="quantity" value="<?= (int) $item['quantity'] ?>" min="0" required></label>
+  </div>
+  <div class="two-col">
+    <label>Sale price (leave empty if rent only) <input type="number" name="sale_price" value="<?= e((string) $item['sale_price']) ?>" min="0" step="0.01"></label>
+    <label>How many we have to sell <input type="number" name="sale_stock" value="<?= (int) $item['sale_stock'] ?>" min="0"></label>
   </div>
   <label>Photo link (optional) <input type="url" name="image_url" value="<?= e((string) $item['image_url']) ?>" placeholder="https://"></label>
   <button type="submit" class="btn btn-big"><?= $id ? 'Save changes' : 'Add item' ?></button>
