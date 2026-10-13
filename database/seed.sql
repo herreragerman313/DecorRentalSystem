@@ -31,7 +31,7 @@ INSERT INTO items (id, category_id, name, description, color_name, color_hex, pr
 (6, 2, 'Glass candle holder set',   'Set of three clear glass cylinders with LED candles.',                               'Clear', '#D8E3E8', 5.00, 50),
 (7, 3, 'White round tablecloth',    '120 in round polyester cloth. Fits a 60 in round table to the floor.',               'White', '#F4F4F2', 12.00, 60),
 (8, 3, 'Navy table runner',         '12 by 108 in satin runner.',                                                         'Navy', '#1F2C56', 4.00, 40),
-(9, 3, 'Gold charger plate',        '13 in acrylic charger. Sold per plate.',                                             'Gold', '#C7A23A', 1.00, 120),
+(9, 3, 'Gold charger plate',        '13 in acrylic charger. Rent per plate.',                                             'Gold', '#C7A23A', 1.00, 120),
 (10, 4, 'Warm string lights',       '50 ft strand of warm white bulbs. Indoor or outdoor.',                              'Warm white', '#F6D88A', 15.00, 10),
 (11, 4, 'Marquee letters',          '3 ft light up letters. Rent per letter.',                                            'White', '#F2F0EA', 45.00, 26),
 (12, 5, 'Welcome sign easel',       'Wooden easel with a blank acrylic sign. Add your own lettering.',                   'Natural wood', '#B38B5D', 12.00, 6),
@@ -57,14 +57,6 @@ INSERT INTO package_items (package_id, item_id, quantity) VALUES
 (3, 14, 1), (3, 12, 1), (3, 13, 1), (3, 6, 5),
 (4, 15, 2), (4, 8, 4), (4, 10, 2),
 (5, 3, 1), (5, 10, 2), (5, 4, 6), (5, 7, 6);
-
--- Pieces we also sell, for people who want to keep them
--- (sale stock is separate from the rental stock)
-UPDATE items SET sale_price = 12.00, sale_stock = 20  WHERE id = 6;   -- glass candle holder set
-UPDATE items SET sale_price = 4.00,  sale_stock = 100 WHERE id = 9;   -- gold charger plate
-UPDATE items SET sale_price = 35.00, sale_stock = 3   WHERE id = 12;  -- welcome sign easel
-UPDATE items SET sale_price = 18.00, sale_stock = 10  WHERE id = 15;  -- red white and blue banner
-UPDATE items SET sale_price = 40.00, sale_stock = 8   WHERE id = 5;   -- faux peony centerpiece
 
 -- Past rentals for the demo customer, so the reuse counter and loyalty discount have data
 INSERT INTO rentals (id, user_id, package_id, event_date, pickup_date, return_date, service, status, subtotal, total_price) VALUES

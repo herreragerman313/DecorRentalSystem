@@ -34,8 +34,6 @@ $stats = db()->query("SELECT
     SUM(status = 'picked_up' AND return_date < CURDATE()) AS late
   FROM rentals")->fetch();
 
-$openOrders = (int) db()->query("SELECT COUNT(*) FROM orders WHERE status IN ('pending','ready')")->fetchColumn();
-
 // What each status is allowed to move to next
 $next = [
     'pending'   => ['confirmed' => 'Confirm', 'cancelled' => 'Cancel'],
@@ -49,10 +47,7 @@ require __DIR__ . '/../../includes/header.php';
 
 <div class="section-head">
   <h1>Rentals</h1>
-  <span>
-    <a class="btn btn-ghost" href="<?= e(url('admin/orders.php')) ?>">Shop orders<?= $openOrders ? ' (' . $openOrders . ')' : '' ?></a>
-    <a class="btn btn-ghost" href="<?= e(url('admin/items.php')) ?>">Manage items</a>
-  </span>
+  <a class="btn btn-ghost" href="<?= e(url('admin/items.php')) ?>">Manage items</a>
 </div>
 
 <div class="stats">

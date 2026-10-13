@@ -1,10 +1,9 @@
 <?php
-// All the business logic lives here: what can be booked, prices, discounts,
-// and buying pieces.
+// All the business logic lives here: what can be booked, prices, and discounts.
 //
 // Rule: items are held from the day before the event to the day after.
 // With pickup service the customer picks up and returns on those days.
-// With setup service our team delivers, decorates, and takes it all down.
+// Setup is an optional paid add-on: our team delivers, decorates, and takes it all down.
 
 const ACTIVE_STATUSES = "'pending','confirmed','picked_up'";
 
@@ -210,101 +209,4 @@ function create_rental(int $userId, string $eventDate, array $rows, array $opts 
         $pdo->rollBack();
         throw $ex;
     }
-}
-
-// ---------- Buying pieces to keep ----------
-
-// Creates an order and takes the pieces out of the sale stock.
-// $lines is [item_id => quantity].
-function create_order(int $userId, array $lines): int
-{
-    $lines = array_filter($lines, fn($q) => $q > 0);
-    if (!$lines) {
-        throw new RuntimeException('Choose how many you want to buy.');
-    }
-
-    $pdo = db();
-    $pdo->beginTransaction();
-    try {
-        $ids = array_keys($lines);
-        $placeholders = implode(',', array_fill(0, count($ids), '?'));
-        $stmt = $pdo->prepare("SELECT id, name, sale_price, sale_stock FROM items
-                               WHERE id IN ($placeholders) AND is_active = 1 AND sale_price IS NOT NULL
-                               FOR UPDATE");
-        $stmt->execute($ids);
-        $items = [];
-        foreach ($stmt->fetchAll() as $row) {
-            $items[(int) $row['id']] = $row;
-        }
-
-        $total = 0.0;
-        foreach ($lines as $itemId => $qty) {
-            if (!isset($items[$itemId])) {
-                throw new RuntimeException('That piece is not for sale right now.');
-            }
-            $left = (int) $items[$itemId]['sale_stock'];
-            if ($qty > $left) {
-                $name = $items[$itemId]['name'];
-                throw new RuntimeException($left > 0 ? "Only $left of \"$name\" left to buy." : "\"$name\" is sold out.");
-            }
-            $total += $qty * (float) $items[$itemId]['sale_price'];
-        }
-
-        $stmt = $pdo->prepare('INSERT INTO orders (user_id, total_price) VALUES (?, ?)');
-        $stmt->execute([$userId, $total]);
-        $orderId = (int) $pdo->lastInsertId();
-
-        $add  = $pdo->prepare('INSERT INTO order_items (order_id, item_id, quantity, unit_price) VALUES (?, ?, ?, ?)');
-        $take = $pdo->prepare('UPDATE items SET sale_stock = sale_stock - ? WHERE id = ?');
-        foreach ($lines as $itemId => $qty) {
-            $add->execute([$orderId, $itemId, $qty, $items[$itemId]['sale_price']]);
-            $take->execute([$qty, $itemId]);
-        }
-
-        $pdo->commit();
-        return $orderId;
-    } catch (Throwable $ex) {
-        $pdo->rollBack();
-        throw $ex;
-    }
-}
-
-// Cancels an order and puts the pieces back in the sale stock.
-// $userId = null means an admin is cancelling.
-function cancel_order(int $orderId, ?int $userId = null): bool
-{
-    $pdo = db();
-    $pdo->beginTransaction();
-    try {
-        $sql = "UPDATE orders SET status = 'cancelled' WHERE id = ? AND status IN ('pending','ready')";
-        $params = [$orderId];
-        if ($userId !== null) {
-            $sql = "UPDATE orders SET status = 'cancelled' WHERE id = ? AND user_id = ? AND status = 'pending'";
-            $params[] = $userId;
-        }
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute($params);
-        if ($stmt->rowCount() !== 1) {
-            $pdo->rollBack();
-            return false;
-        }
-        $pdo->prepare('UPDATE items i JOIN order_items oi ON oi.item_id = i.id
-                       SET i.sale_stock = i.sale_stock + oi.quantity
-                       WHERE oi.order_id = ?')->execute([$orderId]);
-        $pdo->commit();
-        return true;
-    } catch (Throwable $ex) {
-        $pdo->rollBack();
-        throw $ex;
-    }
-}
-
-function order_status_label(string $status): string
-{
-    return [
-        'pending'   => 'Order received',
-        'ready'     => 'Ready for pickup',
-        'completed' => 'Picked up',
-        'cancelled' => 'Cancelled',
-    ][$status] ?? $status;
 }

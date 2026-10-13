@@ -83,7 +83,7 @@ require __DIR__ . '/../includes/header.php';
         <?php if ($item['image_url']): ?>
           <img class="swatch" src="<?= e($item['image_url']) ?>" alt="">
         <?php else: ?>
-          <span class="swatch" style="--swatch: <?= e($item['color_hex']) ?>"><span class="swatch-name"><?= e($item['color_name']) ?></span></span>
+          <span class="swatch <?= shape_class($item['category_slug']) ?>" style="--swatch: <?= e($item['color_hex']) ?>"><span class="swatch-name"><?= e($item['color_name']) ?></span></span>
         <?php endif; ?>
         <span class="chip-body">
           <span class="chip-kicker"><?= e($item['category_name']) ?></span>

@@ -46,7 +46,7 @@ require __DIR__ . '/../includes/header.php';
     <?php if ($item['image_url']): ?>
       <img class="swatch swatch-large" src="<?= e($item['image_url']) ?>" alt="<?= e($item['name']) ?>">
     <?php else: ?>
-      <div class="swatch swatch-large" style="--swatch: <?= e($item['color_hex']) ?>"><span class="swatch-name"><?= e($item['color_name']) ?></span></div>
+      <div class="swatch swatch-large <?= shape_class($item['category_slug']) ?>" style="--swatch: <?= e($item['color_hex']) ?>"><span class="swatch-name"><?= e($item['color_name']) ?></span></div>
     <?php endif; ?>
   </div>
 
@@ -90,24 +90,6 @@ require __DIR__ . '/../includes/header.php';
         </form>
       <?php endif; ?>
     </div>
-
-    <?php if ($item['sale_price'] !== null): ?>
-      <div class="book-box buy-box">
-        <h2>Want to keep it?</h2>
-        <?php if ((int) $item['sale_stock'] > 0): ?>
-          <p>Buy one for <?= money($item['sale_price']) ?>. Pick it up at our next pop up or by appointment. <?= (int) $item['sale_stock'] ?> left.</p>
-          <form method="post" action="<?= e(url('buy.php')) ?>" class="row-form">
-            <?= csrf_field() ?>
-            <input type="hidden" name="id" value="<?= $id ?>">
-            <label class="sr-only" for="buy-qty">How many to buy</label>
-            <input id="buy-qty" type="number" name="quantity" value="1" min="1" max="<?= (int) $item['sale_stock'] ?>" required>
-            <button type="submit" class="btn btn-ghost">Buy to keep</button>
-          </form>
-        <?php else: ?>
-          <p class="muted">Sold out for now. You can still rent it.</p>
-        <?php endif; ?>
-      </div>
-    <?php endif; ?>
 
     <?php if ($inPackages): ?>
       <p class="muted">Also part of:

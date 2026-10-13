@@ -87,6 +87,17 @@ function status_label(string $status, bool $setup = false): string
     ][$status] ?? $status;
 }
 
+// Each item is drawn as a simple shape that hints at what it is
+function shape_class(?string $categorySlug): string
+{
+    return [
+        'centerpieces' => 'shape-circle',
+        'lighting'     => 'shape-circle',
+        'linens'       => 'shape-pill',
+        'signs'        => 'shape-pill',
+    ][$categorySlug] ?? 'shape-arch';
+}
+
 // ---------- Flash messages ----------
 function flash(string $type, string $message): void
 {
@@ -180,16 +191,16 @@ function service_fields(float $setupFee): string
 {
     ob_start(); ?>
     <fieldset class="service-choice" data-service>
-      <legend>How do you want it?</legend>
+      <legend>Want us to set it up?</legend>
       <label class="choice">
         <input type="radio" name="service" value="pickup" checked>
-        <span><strong>I'll pick it up</strong>
-          <small>Pick up the day before, return the day after.</small></span>
+        <span><strong>No thanks, I'll decorate</strong>
+          <small>Pick up the day before, return the day after. Included in the price.</small></span>
       </label>
       <label class="choice">
         <input type="radio" name="service" value="setup" data-fee="<?= e((string) $setupFee) ?>">
-        <span><strong>You set it up for me</strong> <span class="fee">+<?= money($setupFee) ?></span>
-          <small>Our team decorates before the event and takes it all down after.</small></span>
+        <span><strong>Add setup and takedown</strong> <span class="fee">+<?= money($setupFee) ?></span>
+          <small>Optional. Our team decorates before the event and takes it all down after.</small></span>
       </label>
       <label class="address-field" data-address>Event address (only if we set it up)
         <input type="text" name="address" maxlength="255" autocomplete="street-address" placeholder="Street, city">

@@ -16,7 +16,7 @@ require __DIR__ . '/../includes/header.php';
 function package_card(array $p): void
 { ?>
   <a class="chip-card" href="<?= e(url('package.php?id=' . $p['id'])) ?>">
-    <span class="swatch" style="--swatch: <?= e($p['color_hex']) ?>"></span>
+    <span class="swatch shape-arch" style="--swatch: <?= e($p['color_hex']) ?>"></span>
     <span class="chip-body">
       <span class="chip-kicker"><?= e($p['event_type']) ?></span>
       <span class="chip-title"><?= e($p['name']) ?></span>
@@ -27,25 +27,39 @@ function package_card(array $p): void
 ?>
 
 <section class="hero">
-  <form class="hero-form" method="get" action="<?= e(url('items.php')) ?>">
-    <h1>
-      <label for="hero-date">My event is on</label>
-      <input id="hero-date" type="date" name="date" min="<?= e($minDate) ?>" required>
-    </h1>
-    <p class="hero-sub">Stylish, reusable decor for birthdays, showers, graduations, quinces, and weddings. Rent it and decorate yourself, or let our team set it up and take it down. Either way, nothing ends up in the trash or your garage.</p>
-    <button type="submit" class="btn btn-big">See what's open that day</button>
-  </form>
-  <?php if ($reused > 0): ?>
-    <p class="reuse-count"><strong><?= number_format($reused) ?></strong> pieces reused so far. That is decor nobody had to buy for one night and throw away.</p>
-  <?php endif; ?>
+  <div class="hero-copy">
+    <h1>Rent the look. Skip the waste.</h1>
+    <p class="hero-sub">Stylish, reusable decor for birthdays, showers, grads, quinces, and weddings. Style it your way, give it back after, and skip the pile of single use party stuff.</p>
+    <form class="date-card" method="get" action="<?= e(url('items.php')) ?>">
+      <label for="hero-date">When's the party?</label>
+      <div class="date-row">
+        <input id="hero-date" type="date" name="date" min="<?= e($minDate) ?>" required>
+        <button type="submit" class="btn btn-big">See what's free</button>
+      </div>
+      <p class="small">Pick up the day before, return the day after. Want us to decorate? Setup is an optional add-on.</p>
+    </form>
+  </div>
+  <div class="hero-art">
+    <div class="art" aria-hidden="true">
+      <span class="blob b-ring"></span>
+      <span class="blob b-arch"></span>
+      <span class="blob b-sun"></span>
+      <span class="blob b-pill"></span>
+      <span class="blob b-dot1"></span>
+      <span class="blob b-dot2"></span>
+    </div>
+    <?php if ($reused > 0): ?>
+      <p class="sticker"><strong><?= number_format($reused) ?></strong> pieces reused, not trashed</p>
+    <?php endif; ?>
+  </div>
 </section>
 
 <section class="steps" aria-labelledby="how">
   <h2 id="how">How it works</h2>
   <ol class="step-list">
-    <li><strong>Pick your date and decor.</strong> Choose a themed package and add extras, or build your own from single pieces.</li>
-    <li><strong>Decorate your way.</strong> Pick it up the day before, or have our team set everything up at your venue.</li>
-    <li><strong>Give it back.</strong> Return it the day after, or we take it down for you. Nothing to store, nothing to throw away.</li>
+    <li><strong>Pick your date and decor</strong> Choose a themed package and add extras, or build your own look from single pieces.</li>
+    <li><strong>Pick up and style it</strong> Grab everything the day before and make it yours. Or add setup and we'll decorate for you.</li>
+    <li><strong>Give it back</strong> Return it the day after. Nothing to store, nothing in the trash, and it heads to the next party.</li>
   </ol>
 </section>
 
@@ -80,11 +94,11 @@ function package_card(array $p): void
 </section>
 
 <section class="perks" aria-labelledby="why">
-  <h2 id="why">Why people come back</h2>
+  <h2 id="why">Why rent instead of buy?</h2>
   <ul class="perk-list">
-    <li><strong>Returning customers save <?= (int) LOYALTY_PERCENT ?>%</strong> on every rental after their first one.</li>
-    <li><strong>New collections every season</strong> so your next party doesn't look like your last one.</li>
-    <li><strong>Love a piece? Keep it.</strong> Some of our decor is <a href="<?= e(url('shop.php')) ?>">for sale</a> too.</li>
+    <li><strong>Less waste</strong> Most party decor gets used once and thrown out. Ours gets cleaned and used again and again.</li>
+    <li><strong>Spend less</strong> Pay a fraction of what it costs to buy, and returning customers save <?= (int) LOYALTY_PERCENT ?>% on every rental after their first one.</li>
+    <li><strong>No storage</strong> Nothing sitting in your closet or garage for years. New collections every season so your next party looks different.</li>
   </ul>
 </section>
 

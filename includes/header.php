@@ -18,18 +18,17 @@ function nav_link(string $path, string $label, bool $active): string
   <title><?= e($pageTitle) ?></title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Instrument+Sans:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="<?= e(url('assets/style.css')) ?>">
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
 <header class="site-header">
   <div class="wrap header-inner">
-    <a class="brand" href="<?= e(url('index.php')) ?>"><?= e(SITE_NAME) ?></a>
+    <a class="brand" href="<?= e(url('index.php')) ?>"><span class="brand-mark" aria-hidden="true"></span><span><?= e(SITE_NAME) ?></span></a>
     <nav class="main-nav" aria-label="Main">
       <?= nav_link('items.php', 'Browse decor', !$inAdmin && in_array($here, ['items.php', 'item.php'])) ?>
       <?= nav_link('packages.php', 'Packages', !$inAdmin && in_array($here, ['packages.php', 'package.php'])) ?>
-      <?= nav_link('shop.php', 'Shop', !$inAdmin && $here === 'shop.php') ?>
       <?php if ($user): ?>
         <?= nav_link('my-rentals.php', 'My rentals', !$inAdmin && in_array($here, ['my-rentals.php', 'rental.php'])) ?>
         <?php if ($user['role'] === 'admin'): ?>

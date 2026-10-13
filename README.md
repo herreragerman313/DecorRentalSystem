@@ -5,7 +5,9 @@ Website for **Zero Waste Event Design Services**, our ENT 310 business at CSUN
 MySQL, HTML, and CSS, and also used as practice for my CIT 480 senior project.
 
 The business replaces throwaway party decorations with stylish, reusable ones.
-We rent and set up reusable decor, and we also sell some pieces.
+We rent reusable decor only (no selling), with setup and takedown as an optional
+paid add-on. Our target customer is people aged 18 to 45 who like decorating for
+events and want a more sustainable option than buying single use decor.
 
 ## Features
 
@@ -14,23 +16,20 @@ We rent and set up reusable decor, and we also sell some pieces.
 - Browse decor by category, search, and event date with live availability
 - Themed packages for quinceañeras, weddings, birthdays, and holidays
 - Customize any package by adding extra pieces
-- Choose pickup, or have our team set it up and take it down (setup fee)
+- Pick up and decorate yourself, or add optional setup and takedown for a fee
 - Seasonal collections highlighted on the home page
-- Buy some pieces to keep from the Shop page
 - Returning customers save 10% on every rental after their first one
 - Reuse counter showing how many pieces were reused instead of thrown away
-- My rentals page with status tracking, cancellation, orders, and a packing checklist
+- My rentals page with status tracking, cancellation, and a packing checklist
 
 **Admin**
 - Dashboard with rentals waiting, pickups this week, items out, and late returns
 - Move rentals through Requested, Confirmed, Picked up, Returned, or Cancelled
 - Setup rentals show the event address and use "Set up" and "Taken down" steps
-- Shop orders page: mark orders ready, picked up, or cancel (stock goes back)
-- Add, edit, hide, and show items, including sale price and stock
+- Add, edit, hide, and show items
 
 **Booking rules**
 - Items are held from the day before the event to the day after, for pickup or setup
-- Rental stock and sale stock are tracked separately, so selling a piece never breaks a booking
 - No double booking: item rows are locked during booking (`SELECT ... FOR UPDATE`)
   so two people can't book the last unit at the same moment
 - Events need at least 2 days notice and can be booked up to a year ahead

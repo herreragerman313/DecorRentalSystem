@@ -13,14 +13,6 @@ $stmt = db()->prepare('SELECT r.*, p.name AS package_name,
 $stmt->execute([$user['id']]);
 $rentals = $stmt->fetchAll();
 
-$stmt = db()->prepare('SELECT o.*,
-                              (SELECT GROUP_CONCAT(CONCAT(oi.quantity, " x ", i.name) ORDER BY i.name SEPARATOR ", ")
-                               FROM order_items oi JOIN items i ON i.id = oi.item_id
-                               WHERE oi.order_id = o.id) AS item_list
-                       FROM orders o WHERE o.user_id = ? ORDER BY o.created_at DESC');
-$stmt->execute([$user['id']]);
-$orders = $stmt->fetchAll();
-
 $reused = pieces_reused((int) $user['id']);
 $returning = gets_loyalty_discount((int) $user['id']);
 
@@ -77,34 +69,6 @@ require __DIR__ . '/../includes/header.php';
     <h2>Past and cancelled</h2>
     <div class="rental-list"><?php rental_rows($past); ?></div>
   <?php endif; ?>
-<?php endif; ?>
-
-<?php if ($orders): ?>
-  <h2 id="orders">Pieces you bought</h2>
-  <div class="table-wrap">
-    <table>
-      <thead><tr><th>#</th><th>What</th><th>Total</th><th>Status</th><th></th></tr></thead>
-      <tbody>
-        <?php foreach ($orders as $o): ?>
-          <tr>
-            <td><?= (int) $o['id'] ?></td>
-            <td><?= e($o['item_list']) ?></td>
-            <td><?= money($o['total_price']) ?></td>
-            <td><span class="status status-order-<?= e($o['status']) ?>"><?= e(order_status_label($o['status'])) ?></span></td>
-            <td>
-              <?php if ($o['status'] === 'pending'): ?>
-                <form method="post" action="<?= e(url('cancel-order.php')) ?>" class="inline" data-confirm="Cancel order #<?= (int) $o['id'] ?>?">
-                  <?= csrf_field() ?>
-                  <input type="hidden" name="id" value="<?= (int) $o['id'] ?>">
-                  <button type="submit" class="btn btn-small btn-quiet">Cancel</button>
-                </form>
-              <?php endif; ?>
-            </td>
-          </tr>
-        <?php endforeach; ?>
-      </tbody>
-    </table>
-  </div>
 <?php endif; ?>
 
 <?php require __DIR__ . '/../includes/footer.php'; ?>

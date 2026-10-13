@@ -7,8 +7,10 @@ CREATE DATABASE IF NOT EXISTS decor_rental
 
 USE decor_rental;
 
+-- Old shop tables from an earlier version (the business is rental only now)
 DROP TABLE IF EXISTS order_items;
 DROP TABLE IF EXISTS orders;
+
 DROP TABLE IF EXISTS rental_items;
 DROP TABLE IF EXISTS rentals;
 DROP TABLE IF EXISTS package_items;
@@ -42,9 +44,7 @@ CREATE TABLE items (
   color_name  VARCHAR(40)  NOT NULL DEFAULT 'Assorted',
   color_hex   CHAR(7)      NOT NULL DEFAULT '#CCCCCC',
   price       DECIMAL(8,2) NOT NULL,          -- rental price per event, per unit
-  quantity    INT NOT NULL DEFAULT 1,         -- units we own for renting
-  sale_price  DECIMAL(8,2) NULL,              -- set this to also sell the item
-  sale_stock  INT NOT NULL DEFAULT 0,         -- units for sale (separate from rental stock)
+  quantity    INT NOT NULL DEFAULT 1,         -- units we own
   image_url   VARCHAR(500) NULL,
   is_active   TINYINT(1) NOT NULL DEFAULT 1,
   created_at  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -108,22 +108,3 @@ CREATE TABLE rental_items (
   FOREIGN KEY (item_id)   REFERENCES items(id)
 ) ENGINE=InnoDB;
 
--- Pieces customers buy to keep
-CREATE TABLE orders (
-  id          INT AUTO_INCREMENT PRIMARY KEY,
-  user_id     INT NOT NULL,
-  status      ENUM('pending','ready','completed','cancelled') NOT NULL DEFAULT 'pending',
-  total_price DECIMAL(10,2) NOT NULL,
-  created_at  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (user_id) REFERENCES users(id)
-) ENGINE=InnoDB;
-
-CREATE TABLE order_items (
-  id         INT AUTO_INCREMENT PRIMARY KEY,
-  order_id   INT NOT NULL,
-  item_id    INT NOT NULL,
-  quantity   INT NOT NULL,
-  unit_price DECIMAL(8,2) NOT NULL,
-  FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE,
-  FOREIGN KEY (item_id)  REFERENCES items(id)
-) ENGINE=InnoDB;
