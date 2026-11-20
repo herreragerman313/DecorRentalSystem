@@ -65,6 +65,13 @@ public/      everything the browser can reach (this is the web root)
   assets/    CSS and JavaScript
 ```
 
+## Live site
+
+**https://zerowastedecor.website**
+
+Want to try it? Log in as the sample customer `demo@zerowaste.test` with
+password `ChangeMe123!`. The admin account on the live site uses a private password.
+
 ## Run it on your computer (Windows with XAMPP)
 
 1. Install XAMPP from https://www.apachefriends.org and open the XAMPP Control Panel.
@@ -72,10 +79,9 @@ public/      everything the browser can reach (this is the web root)
 3. Click **Admin** next to MySQL to open phpMyAdmin.
 4. Click the **Import** tab, choose `database/schema.sql`, and click **Import**.
 5. Do the same with `database/seed.sql`.
-6. Open PowerShell and run:
+6. Open PowerShell in the project folder and run:
 
 ```powershell
-cd C:\Users\herre\DecorRentalSystem
 C:\xampp\php\php.exe -S localhost:8000 -t public
 ```
 
@@ -83,11 +89,11 @@ C:\xampp\php\php.exe -S localhost:8000 -t public
 
 Keep PowerShell open while you use the site. Press Ctrl+C to stop it.
 
-**Logins** (password for both is `ChangeMe123!`):
+**Sample logins for local testing** (password for both is `ChangeMe123!`):
 - Admin: `admin@zerowaste.test`
 - Returning customer with past rentals: `demo@zerowaste.test`
 
-Change these before putting the site online.
+Change the admin password before putting the site online.
 
 ## Settings
 
@@ -108,16 +114,20 @@ variables instead so no passwords go on GitHub:
 | DB_PASS     | Database password              |
 | APP_DEBUG   | `true` while building, `false` when live |
 
-## Deploying to AWS (plan)
+## How it is hosted
 
-1. Two Ubuntu EC2 instances running Apache and PHP, with the web root set to `public/`.
-2. MySQL primary server, plus a replica for backups and reads.
-3. Application Load Balancer in front of both web servers.
-4. Set the database settings with `SetEnv` in the Apache site config.
-5. Turn on **sticky sessions** on the load balancer target group. PHP saves logins
-   on each server's disk, so without this a user could get logged out when the
-   load balancer sends them to the other server.
-6. Set `APP_DEBUG` to `false` and change the admin password.
+- **AWS Lightsail** server running Ubuntu 24.04, Apache, PHP 8.3, and MariaDB
+- **Static IP** so the address never changes
+- **Firewall** only allows web traffic (ports 80 and 443) and SSH
+- **Custom domain** with DNS A records pointing to the server
+- **HTTPS** with a free Let's Encrypt certificate that renews automatically
+- **Separate database user** that can only read and write rows (it cannot drop tables or create users)
+- Database login set with `SetEnv` in the Apache config, so no passwords are on GitHub
+- `APP_DEBUG` set to `false` so error details are never shown to visitors
+- Security updates installed with `apt upgrade`
+
+Updating the live site: push to GitHub, then on the server run
+`cd /var/www/DecorRentalSystem && sudo git pull`.
 
 ## Ideas for next features
 
@@ -126,3 +136,4 @@ variables instead so no passwords go on GitHub:
 - Email confirmation when a rental is confirmed
 - Late fee tracking
 - Links to our Etsy and Amazon listings
+- Load balancer with two web servers for higher traffic
